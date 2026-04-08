@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overlap Cloner Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type=number] { -moz-appearance: textfield; }
+    .fragment-card { transition: all 0.2s; }
+    .warning-red { color: #dc2626; font-weight: 700; }
+    .result-val { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <div class="max-w-lg mx-auto px-4 py-6">
+
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Overlap Cloner</h1>
+      <p class="text-sm text-gray-500 mt-1">Assembly 반응 계산기</p>
+    </div>
+
+    <!-- Fragment 수 선택 -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Fragment 수</p>
+      <div class="flex gap-2" id="fragTabs">
+        <button onclick="setFragCount(2)" class="frag-tab flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all" data-n="2">2개</button>
+        <button onclick="setFragCount(3)" class="frag-tab flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all" data-n="3">3개</button>
+        <button onclick="setFragCount(4)" class="frag-tab flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all" data-n="4">4개</button>
+        <button onclick="setFragCount(5)" class="frag-tab flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all" data-n="5">5개</button>
+      </div>
+    </div>
+
+    <!-- Fragments -->
+    <div id="fragmentsContainer" class="space-y-4 mb-4"></div>
+
+    <!-- 총 DNA 양 -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+      <div class="flex items-center justify-between">
+        <span class="text-sm font-semibold text-gray-700">총 DNA 양</span>
+        <span id="totalDNA" class="text-lg font-bold result-val text-gray-800">— ng</span>
+      </div>
+      <div id="totalWarning" class="hidden mt-2 text-xs warning-red">
+        ⚠ 총 DNA가 300ng 이상입니다. 반응 효율이 저하될 수 있습니다.
+      </div>
+    </div>
+
+    <!-- 반응 부피 선택 -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">반응 총 부피</p>
+      <div class="flex gap-2" id="volTabs">
+        <button onclick="setReactionVol(10)" class="vol-tab flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all" data-v="10">10 μL</button>
+        <button onclick="setReactionVol(15)" class="vol-tab flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all" data-v="15">15 μL</button>
+        <button onclick="setReactionVol(20)" class="vol-tab flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all" data-v="20">20 μL</button>
+        <button onclick="setReactionVol(30)" class="vol-tab flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all" data-v="30">30 μL</button>
+      </div>
+    </div>
+
+    <!-- 반응 조성 -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">반응 조성</p>
+      <div id="reactionTable" class="space-y-2"></div>
+    </div>
+
+    <!-- 초기화 -->
+    <button onclick="resetAll()" class="w-full py-3 rounded-2xl border-2 border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-100 transition-all mb-8">
+      초기화
+    </button>
+
+  </div>
+
+  <script>
+    let fragCount = 2;
+    let reactionVol = 10;
+
+    // Fragment #1 고정 입력값 (기본값)
+    const defaults = {
+      length1: '', amount1: '', conc1: '',
+      length: ['', '', '', ''],
+      conc: ['', '', '', '']
+    };
+
+    function setFragCount(n) {
+      fragCount = n;
+      document.querySelectorAll('.frag-tab').forEach(btn => {
+        const active = parseInt(btn.dataset.n) === n;
+        btn.className = `frag-tab flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all ${
+          active ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200'
+        }`;
+      });
+      renderFragments();
+      calculate();
+    }
+
+    function setReactionVol(v) {
+      reactionVol = v;
+      document.querySelectorAll('.vol-tab').forEach(btn => {
+        const active = parseInt(btn.dataset.v) === v;
+        btn.className = `vol-tab flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all ${
+          active ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200'
+        }`;
+      });
+      calculate();
+    }
+
+    function inputField(id, label, placeholder, unit, readonly = false) {
+      const bg = readonly ? 'bg-blue-50' : 'bg-gray-50';
+      const textColor = readonly ? 'text-blue-700 font-semibold' : 'text-gray-800';
+      return `
+        <div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+          <label class="text-sm text-gray-600 flex-shrink-0 w-40">${label}</label>
+          <div class="flex items-center gap-1">
+            <input
+              id="${id}"
+              type="number"
+              inputmode="decimal"
+              placeholder="${placeholder}"
+              ${readonly ? 'readonly' : ''}
+              oninput="calculate()"
+              class="w-28 text-right px-3 py-1.5 rounded-lg text-sm ${bg} ${textColor} ${readonly ? 'cursor-default' : 'focus:outline-none focus:ring-2 focus:ring-blue-300'}"
+            >
+            <span class="text-xs text-gray-400 w-8">${unit}</span>
+          </div>
+        </div>`;
+    }
+
+    function renderFragments() {
+      const container = document.getElementById('fragmentsContainer');
+      container.innerHTML = '';
+
+      // Fragment #1 (긴 DNA)
+      const f1 = document.createElement('div');
+      f1.className = 'fragment-card bg-white rounded-2xl shadow-sm border border-gray-100 p-4';
+      f1.innerHTML = `
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">#1</span>
+          <span class="text-sm font-semibold text-gray-700">긴 DNA (입력)</span>
+        </div>
+        ${inputField('f1_length', 'DNA 길이', '4445', 'bp')}
+        ${inputField('f1_amount', 'DNA 양', '200', 'ng')}
+        ${inputField('f1_conc', '농도 (보유)', '84', 'ng/μL')}
+        ${inputField('f1_vol', '사용 부피', '', 'μL', true)}
+        ${inputField('f1_pmol', 'pmol', '', 'pmol', true)}
+      `;
+      container.appendChild(f1);
+
+      // Fragment #2 ~ #N (짧은 DNA들)
+      const colors = ['green', 'purple', 'orange'];
+      const colorMap = [
+        { bg: 'bg-green-600', light: 'bg-green-50', text: 'text-green-700' },
+        { bg: 'bg-purple-600', light: 'bg-purple-50', text: 'text-purple-700' },
+        { bg: 'bg-orange-600', light: 'bg-orange-50', text: 'text-orange-700' },
+        { bg: 'bg-pink-600', light: 'bg-pink-50', text: 'text-pink-700' },
+      ];
+
+      for (let i = 2; i <= fragCount; i++) {
+        const idx = i - 2;
+        const c = colorMap[idx];
+        const card = document.createElement('div');
+        card.className = 'fragment-card bg-white rounded-2xl shadow-sm border border-gray-100 p-4';
+        card.innerHTML = `
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-6 h-6 rounded-full ${c.bg} text-white text-xs font-bold flex items-center justify-center">#${i}</span>
+            <span class="text-sm font-semibold text-gray-700">Fragment #${i}</span>
+          </div>
+          ${inputField(`f${i}_length`, 'DNA 길이', '976', 'bp')}
+          <div class="flex items-center justify-between py-2 border-b border-gray-50">
+            <label class="text-sm text-gray-600 flex-shrink-0 w-40">필요량 (1:1 pmol)</label>
+            <div class="flex items-center gap-1">
+              <input id="f${i}_amount" type="number" readonly
+                class="w-28 text-right px-3 py-1.5 rounded-lg text-sm ${c.light} ${c.text} font-semibold cursor-default">
+              <span class="text-xs text-gray-400 w-8">ng</span>
+            </div>
+          </div>
+          ${inputField(`f${i}_conc`, '농도 (보유)', '12', 'ng/μL')}
+          ${inputField(`f${i}_vol`, '사용 부피', '', 'μL', true)}
+        `;
+        container.appendChild(card);
+      }
+
+      // 이전 값 복원
+      restoreValues();
+    }
+
+    function restoreValues() {
+      const ids = ['f1_length', 'f1_amount', 'f1_conc'];
+      for (let i = 2; i <= 5; i++) {
+        ids.push(`f${i}_length`, `f${i}_conc`);
+      }
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && defaults[id] !== undefined) el.value = defaults[id];
+      });
+    }
+
+    function saveValues() {
+      ['f1_length', 'f1_amount', 'f1_conc'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) defaults[id] = el.value;
+      });
+      for (let i = 2; i <= 5; i++) {
+        [`f${i}_length`, `f${i}_conc`].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) defaults[id] = el.value;
+        });
+      }
+    }
+
+    function getVal(id) {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const v = parseFloat(el.value);
+      return isNaN(v) ? null : v;
+    }
+
+    function setVal(id, val, decimals = 3) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = val !== null && !isNaN(val) ? val.toFixed(decimals) : '';
+    }
+
+    function calculate() {
+      saveValues();
+
+      const len1 = getVal('f1_length');
+      const amt1 = getVal('f1_amount');
+      const conc1 = getVal('f1_conc');
+
+      // pmol of fragment #1
+      let pmol1 = null;
+      if (len1 && amt1 && len1 > 0) {
+        pmol1 = amt1 * 1000000 / (660 * len1);
+      }
+      setVal('f1_pmol', pmol1, 4);
+
+      // Volume of fragment #1
+      let vol1 = null;
+      if (amt1 !== null && conc1 !== null && conc1 > 0) {
+        vol1 = amt1 / conc1;
+      }
+      setVal('f1_vol', vol1, 4);
+
+      // Fragments #2~N
+      const insertAmounts = [];
+      const volumes = [vol1];
+
+      for (let i = 2; i <= fragCount; i++) {
+        const lenI = getVal(`f${i}_length`);
+        const concI = getVal(`f${i}_conc`);
+
+        // Required amount for 1:1 pmol with vector (#1)
+        let amtI = null;
+        if (pmol1 !== null && lenI !== null && lenI > 0) {
+          amtI = pmol1 * 660 * lenI / 1000000;
+        }
+
+        const amtEl = document.getElementById(`f${i}_amount`);
+        if (amtEl) amtEl.value = amtI !== null ? amtI.toFixed(4) : '';
+
+        insertAmounts.push(amtI);
+
+        let volI = null;
+        if (amtI !== null && concI !== null && concI > 0) {
+          volI = amtI / concI;
+        }
+        setVal(`f${i}_vol`, volI, 4);
+        volumes.push(volI);
+      }
+
+      // Total DNA: only show when ALL fragment amounts are known
+      const totalEl = document.getElementById('totalDNA');
+      const warnEl = document.getElementById('totalWarning');
+      const allAmountsKnown = amt1 !== null && insertAmounts.every(a => a !== null);
+      if (allAmountsKnown) {
+        const totalDNA = amt1 + insertAmounts.reduce((s, a) => s + a, 0);
+        totalEl.textContent = totalDNA.toFixed(2) + ' ng';
+        if (totalDNA >= 300) {
+          totalEl.className = 'text-lg font-bold result-val warning-red';
+          warnEl.classList.remove('hidden');
+        } else {
+          totalEl.className = 'text-lg font-bold result-val text-gray-800';
+          warnEl.classList.add('hidden');
+        }
+      } else {
+        totalEl.textContent = '— ng';
+        totalEl.className = 'text-lg font-bold result-val text-gray-800';
+        warnEl.classList.add('hidden');
+      }
+
+      // Reaction table
+      renderReaction(volumes);
+    }
+
+    function renderReaction(volumes) {
+      const PRESETS = { 10: 1, 15: 1.5, 20: 2, 30: 3 };
+      const enzyme = 1;
+      const buffer = PRESETS[reactionVol] ?? reactionVol / 10;
+
+      // DW는 모든 DNA 부피가 계산된 경우에만 표시
+      const allVolsReady = volumes.every(v => v !== null);
+      const dnaSum = allVolsReady ? volumes.reduce((acc, v) => acc + v, 0) : null;
+      const dw = allVolsReady ? reactionVol - enzyme - buffer - dnaSum : null;
+
+      const rows = [
+        { label: 'Enzyme', val: enzyme, unit: 'μL', color: 'text-gray-800' },
+        { label: '10X Buffer', val: buffer, unit: 'μL', color: 'text-gray-800' },
+      ];
+
+      for (let i = 0; i < fragCount; i++) {
+        const v = volumes[i];
+        rows.push({
+          label: `Fragment #${i + 1}`,
+          val: v,
+          unit: 'μL',
+          color: v === null ? 'text-gray-400' : 'text-gray-800'
+        });
+      }
+
+      const dwColor = dw !== null && dw < 0 ? 'warning-red' : 'text-gray-800';
+      rows.push({ label: 'DW', val: dw, unit: 'μL', color: dwColor });
+      rows.push({ label: '합계', val: reactionVol, unit: 'μL', color: 'text-blue-700 font-bold', divider: true });
+
+      const table = document.getElementById('reactionTable');
+      table.innerHTML = rows.map(r => `
+        <div class="flex items-center justify-between py-1.5 ${r.divider ? 'border-t-2 border-gray-200 mt-1 pt-2' : ''}">
+          <span class="text-sm text-gray-600">${r.label}</span>
+          <span class="text-sm ${r.color} result-val">
+            ${r.val !== null && isFinite(r.val) ? r.val.toFixed(r.divider ? 0 : 2) : '—'} ${r.unit}
+          </span>
+        </div>
+      `).join('');
+
+      if (dw !== null && dw < 0) {
+        table.innerHTML += `<p class="text-xs warning-red mt-2">⚠ DW 부피가 음수입니다. DNA 농도를 높이거나 반응 부피를 늘려주세요.</p>`;
+      }
+    }
+
+    function resetAll() {
+      ['f1_length', 'f1_amount', 'f1_conc'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      for (let i = 2; i <= fragCount; i++) {
+        [`f${i}_length`, `f${i}_conc`].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+      }
+      // Clear defaults
+      Object.keys(defaults).forEach(k => defaults[k] = '');
+      calculate();
+    }
+
+    // Init
+    setFragCount(2);
+    setReactionVol(10);
+  </script>
+
+</body>
+</html>
