@@ -123,7 +123,7 @@
       const textColor = readonly ? 'text-blue-700 font-semibold' : 'text-gray-800';
       return `
         <div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0 gap-2">
-          <label class="text-sm text-gray-600 whitespace-nowrap flex-shrink-0">${label}</label>
+          <label class="text-sm text-gray-600 flex-shrink-0" style="width:5.5rem">${label}</label>
           <div class="flex items-center gap-1 flex-shrink-0" style="width:9rem">
             <input
               id="${id}"
@@ -181,7 +181,7 @@
           </div>
           ${inputField(`f${i}_length`, 'DNA 길이', '입력', 'bp')}
           <div class="flex items-center justify-between py-2 border-b border-gray-50 gap-2">
-            <label class="text-sm text-gray-600 whitespace-nowrap flex-shrink-0">필요량</label>
+            <label class="text-sm text-gray-600 flex-shrink-0" style="width:5.5rem">필요량</label>
             <div class="flex items-center gap-1 flex-shrink-0" style="width:9rem">
               <input id="f${i}_amount" type="number" readonly
                 style="width:5.5rem;min-width:5.5rem"
