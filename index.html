@@ -74,10 +74,10 @@
     <!-- MP Lab 광고 -->
     <a href="https://junjunxy.notion.site/1edcb7e03b8180c4a6c4c81f79a0da02?pvs=73" target="_blank" rel="noopener noreferrer"
       class="flex items-center gap-3 w-full mb-8 rounded-2xl border border-blue-200 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 transition-all px-4 py-3 cursor-pointer">
-      <img src="size+.jpeg" alt="MP Lab 로고" class="w-16 h-16 rounded-xl object-contain bg-white flex-shrink-0">
-      <div class="flex-1">
+      <img src="size+.jpeg" alt="MP Lab 로고" class="w-12 h-12 rounded-xl object-contain bg-white flex-shrink-0">
+      <div class="flex-1 min-w-0">
         <p class="text-xs font-semibold text-blue-500 uppercase tracking-wide mb-0.5">Made by</p>
-        <p class="text-xs font-bold text-blue-700 leading-snug">국립공주대학교 수산생명의학과<br>분자병리학실험실 MP Lab</p>
+        <p class="text-xs font-bold text-blue-700 leading-snug">국립공주대학교<br>수산생명의학과<br>분자병리학실험실 MP Lab</p>
       </div>
       <span class="text-blue-400 text-lg flex-shrink-0">↗</span>
     </a>
@@ -122,9 +122,9 @@
       const bg = readonly ? 'bg-blue-50' : 'bg-gray-50';
       const textColor = readonly ? 'text-blue-700 font-semibold' : 'text-gray-800';
       return `
-        <div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0 gap-2">
-          <label class="text-sm text-gray-600 flex-shrink-0">${label}</label>
-          <div class="flex items-center gap-1 flex-shrink-0">
+        <div class="flex items-center py-2 border-b border-gray-50 last:border-0 gap-2">
+          <label class="text-sm text-gray-600 flex-1 min-w-0">${label}</label>
+          <div class="flex items-center gap-1 flex-shrink-0" style="width:9rem">
             <input
               id="${id}"
               type="number"
@@ -132,7 +132,8 @@
               placeholder="${placeholder}"
               ${readonly ? 'readonly' : ''}
               oninput="calculate()"
-              class="w-24 text-right px-2 py-1.5 rounded-lg text-sm border ${bg} ${textColor} ${readonly ? 'cursor-default border-transparent' : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-300'}"
+              style="width:5.5rem;min-width:5.5rem"
+              class="text-right px-2 py-1.5 rounded-lg text-sm border ${bg} ${textColor} ${readonly ? 'cursor-default border-transparent' : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-300'}"
             >
             <span class="text-xs text-gray-400 inline-block w-10">${unit}</span>
           </div>
@@ -179,11 +180,12 @@
             <span class="text-sm font-semibold text-gray-700">Fragment #${i}</span>
           </div>
           ${inputField(`f${i}_length`, 'DNA 길이', '입력', 'bp')}
-          <div class="flex items-center justify-between py-2 border-b border-gray-50 gap-2">
-            <label class="text-sm text-gray-600 flex-shrink-0">필요량</label>
-            <div class="flex items-center gap-1 flex-shrink-0">
+          <div class="flex items-center py-2 border-b border-gray-50 gap-2">
+            <label class="text-sm text-gray-600 flex-1 min-w-0">필요량</label>
+            <div class="flex items-center gap-1 flex-shrink-0" style="width:9rem">
               <input id="f${i}_amount" type="number" readonly
-                class="w-24 text-right px-2 py-1.5 rounded-lg text-sm ${c.light} ${c.text} font-semibold cursor-default">
+                style="width:5.5rem;min-width:5.5rem"
+                class="text-right px-2 py-1.5 rounded-lg text-sm ${c.light} ${c.text} font-semibold cursor-default">
               <span class="text-xs text-gray-400 inline-block w-10">ng</span>
             </div>
           </div>
