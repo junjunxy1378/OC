@@ -122,9 +122,9 @@
       const bg = readonly ? 'bg-blue-50' : 'bg-gray-50';
       const textColor = readonly ? 'text-blue-700 font-semibold' : 'text-gray-800';
       return `
-        <div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0 gap-2">
-          <label class="text-sm text-gray-600 flex-shrink-0" style="width:5.5rem">${label}</label>
-          <div class="flex items-center gap-1 flex-shrink-0" style="width:9rem">
+        <div class="flex items-center py-2 border-b border-gray-50 last:border-0 gap-2">
+          <label class="text-sm text-gray-600 flex-shrink-0" style="width:4.5rem">${label}</label>
+          <div class="flex items-center gap-1 flex-1">
             <input
               id="${id}"
               type="number"
@@ -132,10 +132,9 @@
               placeholder="${placeholder}"
               ${readonly ? 'readonly' : ''}
               oninput="calculate()"
-              style="width:5.5rem;min-width:5.5rem"
-              class="text-right px-2 py-1.5 rounded-lg text-sm border ${bg} ${textColor} ${readonly ? 'cursor-default border-transparent' : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-300'}"
+              class="flex-1 min-w-0 text-right px-2 py-1.5 rounded-lg text-sm border ${bg} ${textColor} ${readonly ? 'cursor-default border-transparent' : 'border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-300'}"
             >
-            <span class="text-xs text-gray-400 inline-block w-10">${unit}</span>
+            <span class="text-xs text-gray-400 flex-shrink-0 w-10">${unit}</span>
           </div>
         </div>`;
     }
@@ -180,13 +179,12 @@
             <span class="text-sm font-semibold text-gray-700">Fragment #${i}</span>
           </div>
           ${inputField(`f${i}_length`, 'DNA 길이', '입력', 'bp')}
-          <div class="flex items-center justify-between py-2 border-b border-gray-50 gap-2">
-            <label class="text-sm text-gray-600 flex-shrink-0" style="width:5.5rem">필요량</label>
-            <div class="flex items-center gap-1 flex-shrink-0" style="width:9rem">
+          <div class="flex items-center py-2 border-b border-gray-50 gap-2">
+            <label class="text-sm text-gray-600 flex-shrink-0" style="width:4.5rem">필요량</label>
+            <div class="flex items-center gap-1 flex-1">
               <input id="f${i}_amount" type="number" readonly
-                style="width:5.5rem;min-width:5.5rem"
-                class="text-right px-2 py-1.5 rounded-lg text-sm ${c.light} ${c.text} font-semibold cursor-default">
-              <span class="text-xs text-gray-400 inline-block w-10">ng</span>
+                class="flex-1 min-w-0 text-right px-2 py-1.5 rounded-lg text-sm ${c.light} ${c.text} font-semibold cursor-default">
+              <span class="text-xs text-gray-400 flex-shrink-0 w-10">ng</span>
             </div>
           </div>
           ${inputField(`f${i}_conc`, '농도 (보유)', '입력', 'ng/μL')}
