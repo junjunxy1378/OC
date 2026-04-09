@@ -73,10 +73,13 @@
 
     <!-- MP Lab 광고 -->
     <a href="https://junjunxy.notion.site/1edcb7e03b8180c4a6c4c81f79a0da02?pvs=73" target="_blank" rel="noopener noreferrer"
-      class="block w-full mb-8 rounded-2xl border border-blue-100 bg-blue-50 hover:bg-blue-100 transition-all px-4 py-3 text-center">
-      <p class="text-xs font-semibold text-blue-500 uppercase tracking-wide mb-0.5">Made by</p>
-      <p class="text-sm font-bold text-blue-700">국립공주대학교 MP Lab</p>
-      <p class="text-xs text-blue-400 mt-0.5">자세히 보기 →</p>
+      class="flex items-center gap-3 w-full mb-8 rounded-2xl border border-blue-200 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 transition-all px-4 py-3 cursor-pointer">
+      <img src="size+.jpeg" alt="MP Lab 로고" class="w-16 h-16 rounded-xl object-contain bg-white flex-shrink-0">
+      <div class="flex-1">
+        <p class="text-xs font-semibold text-blue-500 uppercase tracking-wide mb-0.5">Made by</p>
+        <p class="text-sm font-bold text-blue-700 leading-snug">국립공주대학교 수산생명의학과<br>분자병리학실험실 MP Lab</p>
+      </div>
+      <span class="text-blue-400 text-lg flex-shrink-0">↗</span>
     </a>
 
   </div>
@@ -131,7 +134,7 @@
               oninput="calculate()"
               class="w-24 text-right px-2 py-1.5 rounded-lg text-sm ${bg} ${textColor} ${readonly ? 'cursor-default' : 'focus:outline-none focus:ring-2 focus:ring-blue-300'}"
             >
-            <span class="text-xs text-gray-400 whitespace-nowrap">${unit}</span>
+            <span class="text-xs text-gray-400 inline-block w-10">${unit}</span>
           </div>
         </div>`;
     }
@@ -148,9 +151,9 @@
           <span class="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">#1</span>
           <span class="text-sm font-semibold text-gray-700">긴 DNA (입력)</span>
         </div>
-        ${inputField('f1_length', 'DNA 길이', '4445', 'bp')}
-        ${inputField('f1_amount', 'DNA 양', '200', 'ng')}
-        ${inputField('f1_conc', '농도 (보유)', '84', 'ng/μL')}
+        ${inputField('f1_length', 'DNA 길이', '입력', 'bp')}
+        ${inputField('f1_amount', 'DNA 양', '입력', 'ng')}
+        ${inputField('f1_conc', '농도 (보유)', '입력', 'ng/μL')}
         ${inputField('f1_vol', '사용 부피', '', 'μL', true)}
         ${inputField('f1_pmol', 'pmol', '', 'pmol', true)}
       `;
@@ -175,16 +178,16 @@
             <span class="w-6 h-6 rounded-full ${c.bg} text-white text-xs font-bold flex items-center justify-center">#${i}</span>
             <span class="text-sm font-semibold text-gray-700">Fragment #${i}</span>
           </div>
-          ${inputField(`f${i}_length`, 'DNA 길이', '976', 'bp')}
+          ${inputField(`f${i}_length`, 'DNA 길이', '입력', 'bp')}
           <div class="flex items-center justify-between py-2 border-b border-gray-50 gap-2">
             <label class="text-sm text-gray-600 flex-shrink-0">필요량</label>
             <div class="flex items-center gap-1 flex-shrink-0">
               <input id="f${i}_amount" type="number" readonly
                 class="w-24 text-right px-2 py-1.5 rounded-lg text-sm ${c.light} ${c.text} font-semibold cursor-default">
-              <span class="text-xs text-gray-400 whitespace-nowrap">ng</span>
+              <span class="text-xs text-gray-400 inline-block w-10">ng</span>
             </div>
           </div>
-          ${inputField(`f${i}_conc`, '농도 (보유)', '12', 'ng/μL')}
+          ${inputField(`f${i}_conc`, '농도 (보유)', '입력', 'ng/μL')}
           ${inputField(`f${i}_vol`, '사용 부피', '', 'μL', true)}
         `;
         container.appendChild(card);
